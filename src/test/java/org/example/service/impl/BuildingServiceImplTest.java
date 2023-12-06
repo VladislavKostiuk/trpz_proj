@@ -6,6 +6,8 @@ import org.example.enums.Status;
 import org.example.mapper.BuildingMapper;
 import org.example.mapper.BuildingMapperImpl;
 import org.example.repository.BuildingRepository;
+import org.example.security.context.SecurityContext;
+import org.example.security.identity.User;
 import org.example.service.BuildingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,7 @@ class BuildingServiceImplTest {
 
         testBuilding = new Building(1L, "test name", Status.NORMAL, new ArrayList<>());
         testBuildingDTO = buildingMapper.mapToBuildingDTO(testBuilding);
+        SecurityContext.setUser(new User());
     }
 
     @Test
@@ -58,15 +61,33 @@ class BuildingServiceImplTest {
     }
 
     @Test
+    void testGetBuildingById_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> buildingService.getBuildingById(1L));
+    }
+
+    @Test
     void testCreateBuilding_Success() {
         buildingService.createBuilding(testBuildingDTO);
         verify(buildingRepository, times(1)).save(any());
     }
 
     @Test
+    void testCreateBuilding_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> buildingService.createBuilding(testBuildingDTO));
+    }
+
+    @Test
     void testDeleteBuildingById_Success() {
         buildingService.deleteBuildingById(1L);
         verify(buildingRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    void testDeleteBuildingById_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> buildingService.deleteBuildingById(1L));
     }
 
     @Test
@@ -82,4 +103,11 @@ class BuildingServiceImplTest {
         when(buildingRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> buildingService.getBuildingById(1L));
     }
+
+    @Test
+    void testUpdateBuilding_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> buildingService.updateBuilding(1L, testBuildingDTO));
+    }
+
 }

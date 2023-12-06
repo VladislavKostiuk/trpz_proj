@@ -8,6 +8,8 @@ import org.example.enums.Status;
 import org.example.mapper.FurnitureMapper;
 import org.example.mapper.FurnitureMapperImpl;
 import org.example.repository.FurnitureRepository;
+import org.example.security.context.SecurityContext;
+import org.example.security.identity.User;
 import org.example.service.FurnitureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,7 @@ class FurnitureServiceImplTest {
         furnitureService = new FurnitureServiceImpl(furnitureRepository, furnitureMapper);
         testFurniture = new Furniture(1L, "test name", Status.NORMAL);
         testFurnitureDTO = furnitureMapper.mapToFurnitureDTO(testFurniture);
+        SecurityContext.setUser(new User());
     }
 
     @Test
@@ -61,15 +64,33 @@ class FurnitureServiceImplTest {
     }
 
     @Test
+    void testGetFurnitureById_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> furnitureService.getFurnitureById(1L));
+    }
+
+    @Test
     void testCreateFurniture_Success() {
         furnitureService.createFurniture(testFurnitureDTO);
         verify(furnitureRepository, times(1)).save(any());
     }
 
     @Test
+    void testCreateFurniture_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> furnitureService.createFurniture(testFurnitureDTO));
+    }
+
+    @Test
     void testDeleteFurnitureById_Success() {
         furnitureService.deleteFurnitureById(1L);
         verify(furnitureRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    void testDeleteFurnitureById_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> furnitureService.deleteFurnitureById(1L));
     }
 
     @Test
@@ -84,5 +105,11 @@ class FurnitureServiceImplTest {
     void testUpdateFurniture_FurnitureWasNotFound() {
         when(furnitureRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> furnitureService.getFurnitureById(1L));
+    }
+
+    @Test
+    void testUpdateFurniture_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> furnitureService.updateFurniture(1L, testFurnitureDTO));
     }
 }

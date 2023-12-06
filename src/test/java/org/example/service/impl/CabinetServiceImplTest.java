@@ -8,6 +8,8 @@ import org.example.enums.Status;
 import org.example.mapper.CabinetMapper;
 import org.example.mapper.CabinetMapperImpl;
 import org.example.repository.CabinetRepository;
+import org.example.security.context.SecurityContext;
+import org.example.security.identity.User;
 import org.example.service.CabinetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,7 @@ class CabinetServiceImplTest {
         cabinetService = new CabinetServiceImpl(cabinetRepository, cabinetMapper);
         testCabinet = new Cabinet(1L, "test name", Status.NORMAL, new ArrayList<>());
         testCabinetDTO = cabinetMapper.mapToCabinetDTO(testCabinet);
+        SecurityContext.setUser(new User());
     }
 
     @Test
@@ -61,15 +64,33 @@ class CabinetServiceImplTest {
     }
 
     @Test
+    void testGetCabinetById_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> cabinetService.getCabinetById(1L));
+    }
+
+    @Test
     void testCreateCabinet_Success() {
         cabinetService.createCabinet(testCabinetDTO);
         verify(cabinetRepository, times(1)).save(any());
     }
 
     @Test
+    void testCreateCabinet_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> cabinetService.createCabinet(testCabinetDTO));
+    }
+
+    @Test
     void testDeleteCabinetById_Success() {
         cabinetService.deleteCabinetById(1L);
         verify(cabinetRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    void testDeleteCabinetById_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> cabinetService.deleteCabinetById(1L));
     }
 
     @Test
@@ -84,6 +105,12 @@ class CabinetServiceImplTest {
     void testUpdateCabinet_CabinetWasNotFound() {
         when(cabinetRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> cabinetService.getCabinetById(1L));
+    }
+
+    @Test
+    void testUpdateCabinet_UserDoesNotLogged() {
+        SecurityContext.setUser(null);
+        assertThrows(IllegalStateException.class, () -> cabinetService.updateCabinet(1L, testCabinetDTO));
     }
 
 }
