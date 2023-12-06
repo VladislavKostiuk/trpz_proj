@@ -42,5 +42,6 @@ public class FurnitureServiceImpl implements FurnitureService {
                 .orElseThrow(() -> new IllegalArgumentException("Furniture with this id wasn't found"));
         furniture.setName(furnitureDTO.name());
         furniture.setStatus(furnitureDTO.status());
+        furnitureRepository.save(furniture);
     }
 }

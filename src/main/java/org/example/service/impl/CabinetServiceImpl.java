@@ -45,5 +45,6 @@ public class CabinetServiceImpl implements CabinetService {
         cabinet.setName(cabinetDTO.name());
         cabinet.setStatus(cabinetDTO.status());
         cabinet.setFurnitureList(cabinetDTO.furnitureList());
+        cabinetRepository.save(cabinet);
     }
 }

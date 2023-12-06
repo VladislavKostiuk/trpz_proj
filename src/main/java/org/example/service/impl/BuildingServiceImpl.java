@@ -29,6 +29,7 @@ public class BuildingServiceImpl implements BuildingService {
     @Override
     public void createBuilding(BuildingDTO buildingDTO) {
         Building building = buildingMapper.mapToBuilding(buildingDTO);
+        buildingRepository.save(building);
     }
 
     @Override
@@ -43,5 +44,6 @@ public class BuildingServiceImpl implements BuildingService {
         building.setName(buildingDTO.name());
         building.setStatus(buildingDTO.status());
         building.setCabinetList(buildingDTO.cabinetList());
+        buildingRepository.save(building);
     }
 }
